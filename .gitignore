@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Arduino IDE
+*.hex
+*.elf
+build/
+
+# ملفات الصوت والوسائط (محلياً فقط)
+pc/*.mp3
+pc/*.wav
+pc/*.jpg
+pc/*.jpeg
+pc/*.png
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
