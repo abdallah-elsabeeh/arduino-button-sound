@@ -2,14 +2,14 @@
 
 ## نظرة عامة
 
-مشروع **Hardware + PC**: Arduino يقرأ 5 أزرار ويرسل رقم الزر عبر Serial؛ Python على Windows يستقبل الرقم ويشغّل MP3 من مجلد `pc/`.
+مشروع **Hardware + PC**: Arduino يقرأ 5 أزرار ويرسل رقم الزر عبر Serial؛ Python على Windows يشغّل **MP4** (صوت+صورة) **fullscreen** على شاشة البروجكتور (HDMI).
 
 | الحقل | القيمة |
 |-------|--------|
 | **GitHub** | https://github.com/abdallah-elsabeeh/arduino-button-sound |
 | **الفرع الرئيسي** | `master` |
 | **Arduino** | C++ (Arduino IDE)، 9600 baud |
-| **PC** | Python 3.10+، `pyserial`، `playsound3` |
+| **PC** | Python 3.10+، `pyserial`، **mpv** أو **VLC** (خارج Python) |
 | **النشر** | لا يوجد سيرفر — تشغيل محلي على Windows فقط |
 
 ---
@@ -22,9 +22,9 @@ arduino-button-sound/
 │   ├── button_sound/button_sound.ino      # الإنتاج: Pins 4,8,9,10,11
 │   └── button_sound_five/button_sound_five.ino  # بديل: Pins 2–6
 ├── pc/
-│   ├── play_sound.py      # نقطة الدخول — Serial → تشغيل صوت
+│   ├── play_sound.py      # نقطة الدخول — Serial → تشغيل فيديو على البروجكتور
 │   ├── requirements.txt
-│   └── *.mp3              # محلياً فقط (gitignored)
+│   └── videos/*.mp4       # محلياً فقط (gitignored)
 ├── README.md
 ├── PROJECT_AI_INSTRUCTIONS.md
 └── AGENTS.md
@@ -38,30 +38,28 @@ arduino-button-sound/
 - **الرسالة:** سطر نصي `1`–`5` + `\n` عند **ضغطة** (انتقال HIGH→LOW مع debounce).
 - **Debounce:** 60 ms (`button_sound`) أو 50 ms (`button_sound_five`).
 
-لا تغيّر البروتوكول من جهة Arduino دون تحديث `SOUND_FILES` في Python.
+لا تغيّر البروتوكول من جهة Arduino دون تحديث `VIDEO_FILES` في Python.
 
 ---
 
 ## خريطة الأزرار (السكيتش الافتراضي `button_sound`)
 
-| `btn_id` | Pin | ملف MP3 | تسمية في الكود |
+| `btn_id` | Pin | ملف MP4 | تسمية في الكود |
 |----------|-----|---------|----------------|
-| `1` | 4 | `madrid.mp3` | madrid |
-| `2` | 8 | `jordan.mp3` | jordan |
-| `3` | 9 | `wehdat.mp3` | wehdat |
-| `4` | 10 | `faisaly.mp3` | faisaly |
-| `5` | 11 | `baracalona.mp3` | baracalona |
+| `1` | 4 | `videos/realmadrid.mp4` | Real Madrid |
+| `2` | 8 | `videos/barca.mp4` | Barca |
 
 ---
 
 ## منطق Python (`play_sound.py`)
 
-- **PORT:** `COM5` (ثابت — يُعدّل يدوياً).
-- **PLAY_DURATION_SEC:** 60 — مدة التشغيل قبل الإيقاف التلقائي.
-- **تزامن:** `threading.Lock` + `_play_generation` لإيقاف الصوت السابق عند زر جديد.
-- **نفس الزر مرتين:** إذا `_active_btn == btn_id` يُتجاهل الضغط الثاني.
-- عند البدء: يتحقق من وجود كل ملفات MP3؛ إن وُجد ناقص يخرج بـ `sys.exit(1)`.
-- بعد فتح Serial: `time.sleep(2)` لانتظار reset Arduino.
+- **PORT:** `COM5` (يُعدّل يدوياً).
+- **PROJECTOR_SCREEN:** `1` — رقم شاشة mpv/VLC (0 رئيسية، 1 غالباً HDMI).
+- **PLAY_DURATION_SEC:** `0` = الملف كاملاً؛ `>0` = حد أقصى بالثواني.
+- **مشغّل:** mpv (مفضّل) أو VLC عبر `subprocess` — صوت+صورة من **ملف واحد**.
+- **تزامن:** `threading.Lock` + `_play_generation` لإيقاف العرض السابق عند زر جديد.
+- **نفس الزر مرتين:** يُتجاهل إذا `_active_btn == btn_id`.
+- عند البدء: يتحقق من وجود كل ملفات MP4 ومن توفر mpv/VLC.
 
 ---
 
@@ -72,7 +70,7 @@ cd projects/arduino-button-sound/pc
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-# ضع ملفات mp3 في pc/ ثم:
+# ضع ملفات mp4 في pc/videos/ ثم:
 python play_sound.py
 ```
 
@@ -86,7 +84,8 @@ python play_sound.py
 |---------|-----|
 | منفذ COM | `PORT` في `play_sound.py` |
 | مدة التشغيل | `PLAY_DURATION_SEC` |
-| أسماء/مسارات MP3 | `SOUND_FILES`, `BUTTON_LABELS` |
+| شاشة البروجكتور | `PROJECTOR_SCREEN` |
+| أسماء/مسارات MP4 | `VIDEO_FILES`, `BUTTON_LABELS` |
 | Pins الأزرار | `BUTTON_PINS[]` في `.ino` + مزامنة Python |
 | عدد الأزرار | `NUM_BUTTONS` في `.ino` + قاموس Python |
 
@@ -102,7 +101,7 @@ python play_sound.py
 
 ## قواعد للمساعد AI
 
-1. لا ترفع ملفات `.mp3` إلى Git.
+1. لا ترفع ملفات `.mp4` / `.mp3` إلى Git.
 2. لا تُدرج مفاتيح SSH أو tokens في الكود أو التوثيق.
 3. عند تغيير Pins في Arduino، حدّث README و`BUTTON_LABELS` معاً.
 4. الفرع الافتراضي: **`master`** — لا تحذف الفرع بعد الدمج على GitHub.

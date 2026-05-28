@@ -13,12 +13,12 @@
 ## Project Summary
 
 - **Arduino:** 5 أزرار → Serial (`1`–`5` @ 9600 baud).
-- **PC:** Python يقرأ COM ويشغّل MP3 من `pc/`.
+- **PC:** Python يقرأ COM ويشغّل MP4 (صوت+صورة) على شاشة البروجكتور عبر mpv/VLC.
 - **السكيتش الافتراضي:** `arduino/button_sound/button_sound.ino`.
 
 ## Agent Rules
 
-- لا ترفع ملفات صوت (`.mp3`/`.wav`) — موجودة في `.gitignore`.
+- لا ترفع ملفات وسائط (`.mp4`/`.mp3`) — موجودة في `.gitignore`.
 - حافظ على تزامن بروتوكول Serial بين Arduino و Python.
 - لا تفترض منفذ COM — القيمة الافتراضية `COM5` قابلة للتغيير محلياً.
 - لا commit ولا push إلا بطلب صريح من المستخدم.

@@ -10,9 +10,14 @@ venv/
 *.elf
 build/
 
-# ملفات الصوت والوسائط (محلياً فقط)
+# ملفات الوسائط (محلياً فقط)
 pc/*.mp3
+pc/*.mp4
+pc/*.mkv
 pc/*.wav
+pc/videos/*.mp4
+pc/videos/*.mkv
+pc/videos/*.mov
 pc/*.jpg
 pc/*.jpeg
 pc/*.png
